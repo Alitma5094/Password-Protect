@@ -33,6 +33,22 @@ def init_settings():
     return loaded_settings
 
 
+def print_menu(menu_name, options):
+    clear_screen()
+    print("-" * (18 + len(menu_name)))
+    print(f"Password Protect: {menu_name}")
+    print("-" * (18 + len(menu_name)))
+    list_index = 0
+    for index in options:
+        list_index += 1
+        print(str(list_index) + ". " + index)
+    while True:
+        response = input("Please choose one: ")  # TODO: add ability to add default option "Please choose one [1]: "
+        if response.isdecimal():
+            break
+    return options[int(response) - 1]
+
+
 def get_data(old_saved_data):
     """
     Get information for new credentials entry
@@ -112,7 +128,7 @@ def edit_saved_data(saved_data):
         print(str(index) + ". " + i)
     selected_key = keys_list[int(input("What? ")) - 1]
     print(
-        "Please enter the new data seperated by commas. (For example: nEwWeb$ite,NeW eM@l, NeWpAAssW0rd"
+        "Please enter the new data seperated by commas. (For example: nEwWeb$ite,NeW eM@l,NeWpAAssW0rd"
     )
     response = input("> ")
     response = response.split(",")
@@ -142,30 +158,15 @@ def start_cli():
             break
 
     while True:
-        clear_screen()
-        print(
-            """
-------------------------------
-Password Protect: Main Menu
-------------------------------
-
-Welcome! This is the main menu for the Password Protect CLI. Please select an option to begin
-
-1. View saved credentials
-2  Add new credentials
-3. Edit preexisting credentials
-4. Start graphical interface
-5. Save changes
-6. Change settings
-7. Quit
-    """
-        )
-        response = input("Please choose one [1]: ")
-        if response == "1" or response == "":
-            if data == "":
+        response = print_menu(menu_name="Main Menu",
+                              options=["View saved credentials", "Add new credentials", "Edit preexisting credentials",
+                                       "Save changes", "Change settings", "Start graphical interface", "Quit"])
+        if response == "View saved credentials":
+            if not data:
                 print("No saved credentials!")
                 continue
-            new_data = ast.literal_eval(data)
+            # new_data = ast.literal_eval(data)
+            new_data = data
             for i in new_data:
                 print(
                     i
@@ -174,17 +175,21 @@ Welcome! This is the main menu for the Password Protect CLI. Please select an op
                     + ", Password: "
                     + new_data[i]["Password"]
                 )
-        elif response == "2":
+        elif response == "Add new credentials":
             data = get_data(data)
-        elif response == "3":
+        elif response == "Edit preexisting credentials":
             edit_saved_data(data)
-        elif response == "4":
-            print("Starting graphical interface")
-            start_gui()
-        elif response == "5":
+        elif response == "Save changes":
             encrypted_data = encrypt_data(json.dumps(data), key)
             save_data(encrypted_data)
-        elif response == "6":
+        elif response == "Change settings":
             settings_menu()
-        elif response == "7":
-            break
+        elif response == "Start graphical interface":
+            print("Starting graphical interface")
+            start_gui()
+        elif response == "Quit":
+            clear_screen()
+            sys.exit()
+        else:
+            clear_screen()
+            sys.exit()
